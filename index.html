@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Güvenlik Tarayıcı</title>
+</head>
+<body>
+    <h2>Yetkisiz Dizin Tespit Aracı</h2>
+    <input type="text" id="urlInput" placeholder="Site adresini girin (https://site.com)">
+    <button onclick="checkLink()">Tarama Başlat</button>
+
+    <h3>Sonuçlar:</h3>
+    <ul id="resultList"></ul>
+
+    <h3>Geçmiş:</h3>
+    <ul id="historyList"></ul>
+
+    <script>
+        async function checkLink() {
+            const url = document.getElementById("urlInput").value;
+            const response = await fetch('/check', {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({url: url})
+            });
+            const results = await response.json();
+
+            const resultList = document.getElementById("resultList");
+            resultList.innerHTML = "";
+            results.forEach(entry => {
+                const li = document.createElement("li");
+                li.innerText = `${entry.url} - ${entry.status}`;
+                resultList.appendChild(li);
+            });
+
+            loadHistory();
+        }
+
+        async function loadHistory() {
+            const response = await fetch('/history');
+            const history = await response.json();
+            const historyList = document.getElementById("historyList");
+            historyList.innerHTML = "";
+            history.forEach(entry => {
+                const li = document.createElement("li");
+                li.innerText = `${entry.url} - ${entry.status}`;
+                historyList.appendChild(li);
+            });
+        }
+
+        window.onload = loadHistory;
+    </script>
+</body>
+</html>
